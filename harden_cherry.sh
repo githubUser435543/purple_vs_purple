@@ -44,6 +44,7 @@ apt install modsecurity-crs -y
 apt install nmap -y
 apt install rkhunter -y
 apt install foot -y 
+apt install rsync -y
 apt install git -y
 
     # Disable guest login
