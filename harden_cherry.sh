@@ -6,7 +6,7 @@ OUR_USER=$2
 BACKUP_DIR=$3
 
 # Make backups
-
+[[ $EUID -eq 0 ]] || { echo "Run with sudo."; exit 1; }
 
     # CHECK ARGS
 if [[ -n "$OUR_USER" && -n "$SCORING_USER" && -n "$BACKUP_DIR"]]; then
@@ -16,22 +16,20 @@ else
     exit 1
 fi
 
-mkdir /.b; sudo cp -rp {/var/www,/etc,/home,/opt,/root,/srv,/usr/bin} /.b
-
-for p in /var/www /etc /home /opt /root /srv /usr/bin /bin /sbin /usr/sbin; do
+mkdir -p "$3"
+for p in /var/www /etc /home /opt /root /usr/bin /bin /sbin /usr/sbin; do
   [[ -e "$p" ]] || continue
   mkdir -p "$3$(dirname "$p")"
   cp -a "$p" "$3$p"
 done
-
-chattr +i -R /.b
+chmod o-rwx $3
 
 
 rm ~/.bash_history
 
     # Update
 apt update -y 
-apt upgrade -y || sudo apt full-upgrade -y || exit 1
+apt upgrade -y || apt full-upgrade -y || exit 1
 apt install wget -y
 apt install vim -y
 apt install ufw -y 
@@ -47,7 +45,6 @@ apt install nmap -y
 apt install rkhunter -y
 apt install foot -y 
 apt install git -y
-apt install golang-go -y
 
     # Disable guest login
 mkdir -p /etc/lightdm/lightdm.conf.d
@@ -99,15 +96,15 @@ echo "PublickeyAuthentication" >> /etc/ssh/sshd_config
     #SSH whitelist
 sed -i -e '/PubkeyAuthentication yes/d' /etc/ssh/sshd_config
 echo "PubkeyAuthentication no" >> /etc/ssh/sshd_config
-echo "AllowUsers $SCORING_USER $OUR_USER" >> /etc/ssh/sshd_config
+#echo "AllowUsers $SCORING_USER $OUR_USER" >> /etc/ssh/sshd_config
 chattr +i /etc/ssh/sshd_config
-sudo systemctl restart ssh
-sudo systemctl restart sshd
+systemctl restart ssh
+systemctl restart sshd
 
 
     # HARDEN APACHE
 if command -v apache2 >/dev/null 2>&1; then
-    sudo chown -R root:root /etc/apache2
+    chown -R root:root /etc/apache2
     chattr -i -R /etc/www
 fi
     # HARDEN NGINX
