@@ -41,13 +41,13 @@ class CommandResult:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="verifier",
+        prog="spread",
         description=(
             "Replace every whole IPv4 octet named 'x' with 0 through 255, "
             "then invoke EXECUTABLE as: EXECUTABLE IP [ARG ...]."
         ),
         epilog=(
-            "Example: verifier --jobs 8 198.x.8.1 "
+            "Example: spread --jobs 8 198.x.8.1 "
             "default_credentials_test.py root toor"
         ),
     )
